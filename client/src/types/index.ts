@@ -112,6 +112,7 @@ export interface UserConversation {
   isPinned: boolean;
   isMuted: boolean;
   muteExpiresAt?: string;
+  backgroundImage?: string;
   user: User;
 }
 

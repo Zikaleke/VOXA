@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MessageItem } from "./MessageItem";
-import { Conversation, Message, PendingMessage, User } from "@/types";
+import { Conversation, Message, PendingMessage, User, UserConversation } from "@/types";
 import { formatMessageDate } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -128,8 +128,23 @@ export function MessageList({
     );
   }
 
+  // Obter o fundo personalizado da conversa, se houver
+  const backgroundImage = data?.conversation?.participants?.find(
+    (p: UserConversation) => p.userId === user?.id
+  )?.backgroundImage;
+
+  const containerStyle = {
+    backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  };
+  
   return (
-    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50">
+    <div 
+      className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50" 
+      style={containerStyle}
+    >
       {Object.keys(groupedMessages).map(date => (
         <div key={date}>
           {/* Date Divider */}

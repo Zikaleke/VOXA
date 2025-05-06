@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { useMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getUserInitials } from "@/lib/utils";
-import { Menu, Phone, Video, MoreVertical } from "lucide-react";
+import { Menu, Phone, Video, MoreVertical, Image as ImageIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Conversation, User } from "@/types";
 import { initiateCall } from "@/lib/socket";
+import { BackgroundImageModal } from "@/components/chat/BackgroundImageModal";
 
 interface ConversationHeaderProps {
   conversation: Conversation;
@@ -27,6 +29,7 @@ export function ConversationHeader({
   onToggleSidebar 
 }: ConversationHeaderProps) {
   const isMobile = useMobile();
+  const [showBackgroundModal, setShowBackgroundModal] = useState(false);
   
   const handleAudioCall = () => {
     if (conversation && recipient) {
@@ -38,6 +41,14 @@ export function ConversationHeader({
     if (conversation && recipient) {
       initiateCall('video', conversation.id);
     }
+  };
+  
+  const handleOpenBackgroundModal = () => {
+    setShowBackgroundModal(true);
+  };
+  
+  const handleCloseBackgroundModal = () => {
+    setShowBackgroundModal(false);
   };
 
   return (
@@ -102,11 +113,23 @@ export function ConversationHeader({
             <DropdownMenuItem>Ver perfil</DropdownMenuItem>
             <DropdownMenuItem>Silenciar notificações</DropdownMenuItem>
             <DropdownMenuItem>Procurar na conversa</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleOpenBackgroundModal}>
+              <ImageIcon className="h-4 w-4 mr-2" />
+              Alterar fundo
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive">Bloquear contato</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      
+      {showBackgroundModal && (
+        <BackgroundImageModal
+          open={showBackgroundModal}
+          onClose={handleCloseBackgroundModal}
+          conversationId={conversation.id}
+        />
+      )}
     </header>
   );
 }
