@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h1 className="text-4xl font-bold text-primary mb-2">TeleClone</h1>
+      <h1 className="text-4xl font-bold text-primary mb-2">Voxa</h1>
       <p className="text-gray-600 mb-8">Plataforma de mensagens seguras</p>
       
       <LoginForm />

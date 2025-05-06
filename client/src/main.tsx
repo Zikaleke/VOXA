@@ -3,7 +3,7 @@ import App from "./App";
 import "./index.css";
 
 // Set page title and description
-document.title = "TeleClone - Mensagens Seguras";
+document.title = "Voxa - Mensagens Seguras";
 
 // Add favicon if needed
 const existingFavicon = document.querySelector('link[rel="icon"]');

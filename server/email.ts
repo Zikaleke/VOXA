@@ -41,7 +41,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
     await sgMail.send({
       to: params.to,
-      from: process.env.SENDGRID_FROM_EMAIL as string || 'noreply@teleclone.app',
+      from: process.env.SENDGRID_FROM_EMAIL as string || 'noreply@voxa.app',
       subject: params.subject,
       text: params.text,
       html: params.html,
@@ -59,16 +59,16 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
 export async function sendVerificationEmail(email: string, code: string): Promise<boolean> {
   return sendEmail({
     to: email,
-    subject: 'Verifique seu email no TeleClone',
+    subject: 'Verifique seu email no Voxa',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #0088cc;">Verificação de Email TeleClone</h2>
-        <p>Obrigado por se registrar no TeleClone!</p>
+        <h2 style="color: #0088cc;">Verificação de Email Voxa</h2>
+        <p>Obrigado por se registrar no Voxa!</p>
         <p>Seu código de verificação é: <strong>${code}</strong></p>
         <p>Digite este código na tela de verificação para completar seu registro.</p>
-        <p>Se você não se registrou no TeleClone, por favor ignore este email.</p>
+        <p>Se você não se registrou no Voxa, por favor ignore este email.</p>
       </div>
     `,
-    text: `Seu código de verificação do TeleClone é: ${code}\n\nDigite este código na tela de verificação para completar seu registro.\n\nSe você não se registrou no TeleClone, por favor ignore este email.`
+    text: `Seu código de verificação do Voxa é: ${code}\n\nDigite este código na tela de verificação para completar seu registro.\n\nSe você não se registrou no Voxa, por favor ignore este email.`
   });
 }
