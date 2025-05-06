@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SocketProvider } from "@/contexts/SocketContext";
 import { ConversationProvider } from "@/contexts/ConversationContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ContactModalProvider } from "@/hooks/use-contact-modal";
 import { ContactModal } from "@/components/contacts/ContactModal";
 import NotFound from "@/pages/not-found";
@@ -54,17 +55,19 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SocketProvider>
-          <ConversationProvider>
-            <ContactModalProvider>
-              <Router />
-              <Toaster />
-              <ContactModal />
-            </ContactModalProvider>
-          </ConversationProvider>
-        </SocketProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <SocketProvider>
+            <ConversationProvider>
+              <ContactModalProvider>
+                <Router />
+                <Toaster />
+                <ContactModal />
+              </ContactModalProvider>
+            </ConversationProvider>
+          </SocketProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

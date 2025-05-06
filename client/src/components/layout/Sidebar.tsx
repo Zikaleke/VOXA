@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,7 +31,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-72 h-full border-r border-gray-200 bg-white">
+    <aside className="hidden md:flex flex-col w-72 h-full border-r border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
       {/* User Profile Section */}
       <div className="flex items-center px-4 py-3 border-b border-gray-200">
         <div className="relative">
@@ -48,17 +49,18 @@ export function Sidebar() {
           )}
         </div>
         <div className="ml-3 flex-1">
-          <h3 className="font-semibold text-gray-800">
+          <h3 className="font-semibold text-gray-800 dark:text-gray-200">
             {user?.firstName} {user?.lastName}
           </h3>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {user?.status === "online" ? "Online" : "Offline"}
           </p>
         </div>
+        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
-              <MoreVertical className="h-5 w-5 text-gray-600" />
+              <MoreVertical className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
