@@ -118,6 +118,7 @@ export const userConversations = pgTable('user_conversations', {
   isPinned: boolean('is_pinned').default(false),
   isMuted: boolean('is_muted').default(false),
   muteExpiresAt: timestamp('mute_expires_at'),
+  backgroundImage: text('background_image'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
