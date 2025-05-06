@@ -1,9 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
+import { User } from '@shared/schema';
+
+// Extend Request type to include user property
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
+}
 import jwt from 'jsonwebtoken';
 import { storage } from './storage';
 import { userLoginSchema, userRegisterSchema, verifyEmailSchema } from '@shared/schema';
 import { ZodError } from 'zod';
 import crypto from 'crypto';
+import { sendVerificationEmail } from './email';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_for_teleclone';
 const TOKEN_EXPIRY = '30d';
@@ -87,8 +98,13 @@ export const authRoutes = {
       // Create user
       const user = await storage.createUser(userData);
       
-      // In a real app, you would send a verification email here
-      // For this application, we'll just return the verification code
+      // Send verification email
+      await sendVerificationEmail(user.email, user.verificationCode);
+      
+      // For development, we'll still return the verification code
+      // In production, we would remove this
+      const isDevelopment = process.env.NODE_ENV !== 'production';
+      
       return res.status(201).json({ 
         message: 'User registered successfully',
         user: {
@@ -98,7 +114,8 @@ export const authRoutes = {
           firstName: user.firstName,
           lastName: user.lastName
         },
-        verificationCode: user.verificationCode // In production, this should be sent via email instead
+        // Only include verification code in development
+        ...(isDevelopment && { verificationCode: user.verificationCode })
       });
     } catch (error) {
       if (error instanceof ZodError) {
