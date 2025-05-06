@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SocketProvider } from "@/contexts/SocketContext";
 import { ConversationProvider } from "@/contexts/ConversationContext";
+import { ContactModalProvider } from "@/hooks/use-contact-modal";
+import { ContactModal } from "@/components/contacts/ContactModal";
 import NotFound from "@/pages/not-found";
 
 // Auth pages
@@ -55,8 +57,11 @@ function App() {
       <AuthProvider>
         <SocketProvider>
           <ConversationProvider>
-            <Router />
-            <Toaster />
+            <ContactModalProvider>
+              <Router />
+              <Toaster />
+              <ContactModal />
+            </ContactModalProvider>
           </ConversationProvider>
         </SocketProvider>
       </AuthProvider>
