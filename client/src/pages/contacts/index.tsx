@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getUserInitials } from "@/lib/utils";
@@ -134,6 +135,8 @@ export default function ContactsPage() {
   const contacts = contactsData?.contacts || [];
   const contactRequests = requestsData?.requests || [];
 
+  const [, setLocation] = useLocation();
+  
   // Function to create conversation with a contact
   const startConversation = async (contactId: number) => {
     try {
@@ -141,7 +144,7 @@ export default function ContactsPage() {
       const data = await response.json();
       
       // Redirect to the conversation
-      window.location.href = `/chat/${data.conversation.id}`;
+      setLocation(`/chat/${data.conversation.id}`);
     } catch (error) {
       toast({
         title: "Erro",

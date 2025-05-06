@@ -20,12 +20,11 @@ import { Loader2, Search, UserPlus } from "lucide-react";
 import { useContactModal } from "@/hooks/use-contact-modal";
 
 export function ContactModal() {
-  const { isOpen, closeModal } = useContactModal();
+  const { isOpen, closeModal, openSearchModal, isSearchModalOpen, closeSearchModal } = useContactModal();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactInfo, setContactInfo] = useState("");
   const [activeTab, setActiveTab] = useState("direct");
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setContactInfo(e.target.value);
@@ -144,7 +143,7 @@ export function ContactModal() {
                 </p>
                 <Button 
                   onClick={() => {
-                    setIsSearchModalOpen(true);
+                    openSearchModal();
                     closeModal();
                   }}
                   className="w-full"
@@ -165,7 +164,7 @@ export function ContactModal() {
       
       <ContactSearchModal 
         isOpen={isSearchModalOpen} 
-        onClose={() => setIsSearchModalOpen(false)} 
+        onClose={closeSearchModal} 
       />
     </>
   );

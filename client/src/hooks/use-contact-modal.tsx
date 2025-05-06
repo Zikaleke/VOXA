@@ -4,18 +4,32 @@ type ContactModalContextType = {
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
+  isSearchModalOpen: boolean;
+  openSearchModal: () => void;
+  closeSearchModal: () => void;
 };
 
 const ContactModalContext = createContext<ContactModalContextType | undefined>(undefined);
 
 export function ContactModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
+  
+  const openSearchModal = () => setIsSearchModalOpen(true);
+  const closeSearchModal = () => setIsSearchModalOpen(false);
 
   return (
-    <ContactModalContext.Provider value={{ isOpen, openModal, closeModal }}>
+    <ContactModalContext.Provider value={{
+      isOpen,
+      openModal,
+      closeModal,
+      isSearchModalOpen,
+      openSearchModal,
+      closeSearchModal
+    }}>
       {children}
     </ContactModalContext.Provider>
   );
