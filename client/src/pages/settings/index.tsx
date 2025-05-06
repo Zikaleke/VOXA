@@ -172,7 +172,7 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button variant="ghost" className="w-full justify-start">
-                  Sobre o TeleClone
+                  Sobre o Voxa
                 </Button>
                 <Button variant="ghost" className="w-full justify-start">
                   Perguntas frequentes

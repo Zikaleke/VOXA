@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains a full-stack messaging application (TeleClone) built with a React frontend and Express.js backend. The application provides real-time communication features including conversations, groups, channels, and calls. It follows a modern web application architecture with a clear separation between client and server components.
+This repository contains a full-stack messaging application (Voxa) built with a React frontend and Express.js backend. The application provides real-time communication features including conversations, groups, channels, and calls. It follows a modern web application architecture with a clear separation between client and server components.
 
 ## System Architecture
 

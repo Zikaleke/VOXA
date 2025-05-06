@@ -68,7 +68,7 @@ export function RegisterForm() {
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">Registro</CardTitle>
         <CardDescription className="text-center">
-          Crie sua conta para começar a usar o TeleClone
+          Crie sua conta para começar a usar o Voxa
         </CardDescription>
       </CardHeader>
       <CardContent>
