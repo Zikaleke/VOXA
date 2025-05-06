@@ -23,6 +23,7 @@ import ConversationPage from "@/pages/chat/conversation";
 import GroupsPage from "@/pages/groups";
 import ChannelsPage from "@/pages/channels";
 import CallsPage from "@/pages/calls";
+import ContactsPage from "@/pages/contacts";
 import ProfilePage from "@/pages/profile";
 import SettingsPage from "@/pages/settings";
 
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/groups" component={GroupsPage} />
       <Route path="/channels" component={ChannelsPage} />
       <Route path="/calls" component={CallsPage} />
+      <Route path="/contacts" component={ContactsPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/settings" component={SettingsPage} />
       

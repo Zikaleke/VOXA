@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { MessageSquare, Users, Radio, Phone, Settings } from "lucide-react";
+import { MessageSquare, Users, Radio, Phone, Settings, UserCheck } from "lucide-react";
 
 export function MobileNavigation() {
   const [location] = useLocation();
@@ -25,6 +25,11 @@ export function MobileNavigation() {
         <Link href="/calls" className={`p-2 flex flex-col items-center ${location.startsWith('/calls') ? 'text-primary' : 'text-gray-500'}`}>
           <Phone className="h-5 w-5" />
           <span className="text-xs">Chamadas</span>
+        </Link>
+        
+        <Link href="/contacts" className={`p-2 flex flex-col items-center ${location.startsWith('/contacts') ? 'text-primary' : 'text-gray-500'}`}>
+          <UserCheck className="h-5 w-5" />
+          <span className="text-xs">Contatos</span>
         </Link>
         
         <Link href="/settings" className={`p-2 flex flex-col items-center ${location.startsWith('/settings') ? 'text-primary' : 'text-gray-500'}`}>
