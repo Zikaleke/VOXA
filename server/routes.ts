@@ -2,9 +2,18 @@ import express, { type Express, type Request, type Response, type NextFunction }
 import { type ParamsDictionary } from "express-serve-static-core";
 import { type ParsedQs } from "qs";
 
+// Import types from schema
+import { User } from '@shared/schema';
+
+// Define types for participant types
+type UserConversation = {
+  user: User;
+  // add other fields as needed
+};
+
 // Extended request type with user property
 interface AuthenticatedRequest extends Request {
-  user?: { id: number };
+  user?: User;
 }
 import { createServer, type Server } from "http";
 import { setupWebSocketServer } from "./websocket";
