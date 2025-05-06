@@ -3,7 +3,9 @@ import { type ParamsDictionary } from "express-serve-static-core";
 import { type ParsedQs } from "qs";
 
 // Import types from schema
-import { User } from '@shared/schema';
+import { User, userConversations } from '@shared/schema';
+import { db } from '@db';
+import { and, eq } from 'drizzle-orm';
 
 // Define types for participant types
 type UserConversation = {
@@ -458,6 +460,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Conversation background image endpoint
+  app.post("/api/conversations/:id/background", authMiddleware, upload.single("file"), async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      const file = req.file;
+      const userId = req.user!.id;
+      
+      // Check if the user is part of this conversation
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      const isParticipant = conversation.participants.some(p => p.userId === userId);
+      if (!isParticipant) {
+        return res.status(403).json({ message: "You are not part of this conversation" });
+      }
+      
+      // Save the background image URL to the user's conversation record
+      await db.update(userConversations)
+        .set({ backgroundImage: `/uploads/${file.filename}` })
+        .where(and(
+          eq(userConversations.userId, userId),
+          eq(userConversations.conversationId, conversationId)
+        ));
+      
+      return res.status(200).json({ 
+        success: true, 
+        backgroundImage: `/uploads/${file.filename}` 
+      });
+    } catch (error) {
+      console.error("Error updating conversation background:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Conversation background image endpoint
+  app.post("/api/conversations/:id/background", authMiddleware, upload.single("file"), async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      const file = req.file;
+      const userId = req.user!.id;
+      
+      // Check if the user is part of this conversation
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      const isParticipant = conversation.participants.some((p) => p.user.id === userId);
+      if (!isParticipant) {
+        return res.status(403).json({ message: "You are not part of this conversation" });
+      }
+      
+      // Save the background image URL to the user's conversation record
+      await db.update(userConversations)
+        .set({ backgroundImage: `/uploads/${file.filename}` })
+        .where(and(
+          eq(userConversations.userId, userId),
+          eq(userConversations.conversationId, conversationId)
+        ));
+      
+      return res.status(200).json({ 
+        success: true, 
+        backgroundImage: `/uploads/${file.filename}` 
+      });
+    } catch (error) {
+      console.error("Error updating conversation background:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Serve uploaded files
   app.use("/uploads", (req: Request, res: Response, next: NextFunction) => {
     // Only authenticated users can access uploads
