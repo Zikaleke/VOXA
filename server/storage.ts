@@ -3,9 +3,9 @@ import {
   users, userSettings, sessions, deviceTokens, contacts, blockedUsers, 
   conversations, userConversations, messages, groups, groupMembers, 
   channels, channelMembers, mediaFiles, messageReactions, calls, callParticipants, 
-  notifications
+  notifications, contactRequests
 } from '@shared/schema';
-import { eq, and, or, desc, isNull, sql } from 'drizzle-orm';
+import { eq, and, or, desc, isNull, sql, not, ilike } from 'drizzle-orm';
 import { 
   type User, type UserInsert, type Message, type Conversation, 
   type Group, type Channel
