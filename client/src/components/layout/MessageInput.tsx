@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { sendMessage, sendTypingIndicator } from "@/lib/socket";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AudioRecorder } from "@/components/chat/AudioRecorder";
 
 interface MessageInputProps {
   conversationId: number;
@@ -153,7 +154,15 @@ export function MessageInput({ conversationId, onMessageSent }: MessageInputProp
         />
       </div>
 
-      {message.trim() ? (
+      {isRecording ? (
+        <AudioRecorder 
+          conversationId={conversationId} 
+          onAudioSent={() => {
+            setIsRecording(false);
+            onMessageSent('audio-message');
+          }} 
+        />
+      ) : message.trim() ? (
         <Button 
           size="icon" 
           className="ml-2 rounded-full" 
@@ -169,7 +178,7 @@ export function MessageInput({ conversationId, onMessageSent }: MessageInputProp
                 variant="ghost" 
                 size="icon" 
                 className="ml-2 rounded-full bg-primary text-white"
-                onClick={() => setIsRecording(!isRecording)}
+                onClick={() => setIsRecording(true)}
               >
                 <Mic className="h-5 w-5" />
               </Button>

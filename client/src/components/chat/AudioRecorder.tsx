@@ -3,7 +3,6 @@ import { Mic, Square, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { messageTypeEnum } from '@/shared/schema';
 
 interface AudioRecorderProps {
   conversationId: number;
@@ -110,7 +109,7 @@ export function AudioRecorder({ conversationId, onAudioSent }: AudioRecorderProp
         // Send the message with the audio URL
         await apiRequest('POST', `/api/conversations/${conversationId}/messages`, {
           content: uploadData.url,
-          type: messageTypeEnum.enum.audio
+          type: "audio"
         });
 
         // Clear the recorded audio

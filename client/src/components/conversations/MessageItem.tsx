@@ -4,6 +4,7 @@ import { Message, PendingMessage, User } from "@/types";
 import { formatMessageTime, getUserInitials } from "@/lib/utils";
 import { Check, CheckCheck, Play } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { AudioMessage } from "@/components/chat/AudioMessage";
 
 interface MessageItemProps {
   message: Message | PendingMessage;
@@ -54,21 +55,8 @@ export function MessageItem({
       return <p className="text-gray-800">{message.content}</p>;
     }
     
-    if ('type' in message && message.type === 'audio') {
-      return (
-        <div className="flex items-center">
-          <button 
-            className="p-2 rounded-full bg-primary text-white mr-3"
-            onClick={handlePlayAudio}
-          >
-            <Play className="h-4 w-4" />
-          </button>
-          <div className="flex-1">
-            <Progress value={isPlaying ? 30 : 0} className="h-1" />
-            <div className="text-xs text-gray-600 mt-1">0:42</div>
-          </div>
-        </div>
-      );
+    if ('type' in message && message.type === 'audio' && 'content' in message && message.content) {
+      return <AudioMessage audioUrl={message.content} isOwn={isCurrentUser} />;
     }
     
     if ('type' in message && message.type === 'image' && 'media' in message && message.media && message.media.length > 0) {
