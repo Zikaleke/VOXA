@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ConversationsList } from "@/components/conversations/ConversationsList";
+import { ContactButton } from "@/components/contacts/ContactButton";
 import { getUserInitials } from "@/lib/utils";
-import { Search, MessageSquare, Users, Radio, Phone, Settings, MoreVertical } from "lucide-react";
+import { Search, MessageSquare, Users, Radio, Phone, Settings, MoreVertical, UserPlus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -146,12 +147,13 @@ export function Sidebar() {
         )}
       </div>
       
-      {/* Bottom Action Button */}
-      <div className="p-4 border-t border-gray-200">
+      {/* Bottom Action Buttons */}
+      <div className="p-4 border-t border-gray-200 space-y-2">
         <Button className="w-full flex items-center justify-center">
           <MessageSquare className="h-5 w-5 mr-2" />
           Nova Conversa
         </Button>
+        <ContactButton />
       </div>
     </aside>
   );
