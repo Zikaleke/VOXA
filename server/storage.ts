@@ -448,6 +448,108 @@ export const storage = {
     });
   },
 
+  async getContactRequests(userId: number): Promise<any[]> {
+    return db.query.contactRequests.findMany({
+      where: and(
+        eq(contactRequests.recipientId, userId),
+        eq(contactRequests.status, 'pending')
+      ),
+      with: {
+        sender: true
+      }
+    });
+  },
+
+  async createContactRequest(senderId: number, recipientId: number): Promise<void> {
+    // Check if request already exists
+    const existingRequest = await db.query.contactRequests.findFirst({
+      where: and(
+        eq(contactRequests.senderId, senderId),
+        eq(contactRequests.recipientId, recipientId)
+      )
+    });
+
+    if (!existingRequest) {
+      await db.insert(contactRequests).values({
+        senderId,
+        recipientId,
+        status: 'pending'
+      });
+    } else if (existingRequest.status === 'rejected') {
+      // If request was rejected before, update it to pending again
+      await db.update(contactRequests)
+        .set({ status: 'pending', updatedAt: new Date() })
+        .where(eq(contactRequests.id, existingRequest.id));
+    }
+  },
+
+  async acceptContactRequest(requestId: number, userId: number): Promise<void> {
+    // Get the request first
+    const request = await db.query.contactRequests.findFirst({
+      where: and(
+        eq(contactRequests.id, requestId),
+        eq(contactRequests.recipientId, userId),
+        eq(contactRequests.status, 'pending')
+      )
+    });
+
+    if (!request) {
+      throw new Error('Contact request not found');
+    }
+
+    // Update request status
+    await db.update(contactRequests)
+      .set({ status: 'accepted', updatedAt: new Date() })
+      .where(eq(contactRequests.id, requestId));
+
+    // Add contact relationships both ways
+    await this.addContact(userId, request.senderId);
+    await this.addContact(request.senderId, userId);
+  },
+
+  async rejectContactRequest(requestId: number, userId: number): Promise<void> {
+    const request = await db.query.contactRequests.findFirst({
+      where: and(
+        eq(contactRequests.id, requestId),
+        eq(contactRequests.recipientId, userId),
+        eq(contactRequests.status, 'pending')
+      )
+    });
+
+    if (!request) {
+      throw new Error('Contact request not found');
+    }
+
+    await db.update(contactRequests)
+      .set({ status: 'rejected', updatedAt: new Date() })
+      .where(eq(contactRequests.id, requestId));
+  },
+
+  async searchUsers(query: string, currentUserId: number): Promise<any[]> {
+    const searchTerm = `%${query}%`;
+
+    // Find users that match the search term
+    return db.query.users.findMany({
+      where: and(
+        or(
+          ilike(users.username, searchTerm),
+          ilike(users.firstName, searchTerm),
+          ilike(users.lastName, searchTerm),
+          ilike(users.email, searchTerm)
+        ),
+        not(eq(users.id, currentUserId))
+      ),
+      columns: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        profilePicUrl: true,
+        status: true
+      }
+    });
+  },
+
   async addContact(userId: number, contactId: number, nickname?: string): Promise<void> {
     // Check if already exists
     const existingContact = await db.query.contacts.findFirst({

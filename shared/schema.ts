@@ -11,6 +11,7 @@ export const memberRoleEnum = pgEnum('member_role', ['owner', 'admin', 'member']
 export const channelRoleEnum = pgEnum('channel_role', ['owner', 'admin', 'subscriber']);
 export const callTypeEnum = pgEnum('call_type', ['audio', 'video']);
 export const callStatusEnum = pgEnum('call_status', ['initiated', 'ongoing', 'ended', 'missed', 'rejected']);
+export const contactRequestStatusEnum = pgEnum('contact_request_status', ['pending', 'accepted', 'rejected']);
 
 // Users
 export const users = pgTable('users', {
@@ -77,6 +78,16 @@ export const contacts = pgTable('contacts', {
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   contactId: integer('contact_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   nickname: text('nickname'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// Contact requests
+export const contactRequests = pgTable('contact_requests', {
+  id: serial('id').primaryKey(),
+  senderId: integer('sender_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  recipientId: integer('recipient_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  status: contactRequestStatusEnum('status').default('pending'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
@@ -274,6 +285,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   callParticipations: many(callParticipants),
   contacts: many(contacts, { relationName: 'userContacts' }),
   contactOf: many(contacts, { relationName: 'contactOf' }),
+  sentContactRequests: many(contactRequests, { relationName: 'requestSender' }),
+  receivedContactRequests: many(contactRequests, { relationName: 'requestRecipient' }),
   blockedUsers: many(blockedUsers, { relationName: 'blockingUser' }),
   blockedBy: many(blockedUsers, { relationName: 'blockedUser' }),
   settings: one(userSettings),
@@ -462,6 +475,19 @@ export const contactsRelations = relations(contacts, ({ one }) => ({
     fields: [contacts.contactId],
     references: [users.id],
     relationName: 'contactOf'
+  })
+}));
+
+export const contactRequestsRelations = relations(contactRequests, ({ one }) => ({
+  sender: one(users, {
+    fields: [contactRequests.senderId],
+    references: [users.id],
+    relationName: 'requestSender'
+  }),
+  recipient: one(users, {
+    fields: [contactRequests.recipientId],
+    references: [users.id],
+    relationName: 'requestRecipient'
   })
 }));
 
