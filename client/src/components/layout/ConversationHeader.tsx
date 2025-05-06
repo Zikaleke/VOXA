@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getUserInitials } from "@/lib/utils";
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Conversation, User } from "@/types";
+import { Conversation, User, UserConversation } from "@/types";
 import { initiateCall } from "@/lib/socket";
 import { BackgroundImageModal } from "@/components/chat/BackgroundImageModal";
 
@@ -29,6 +30,7 @@ export function ConversationHeader({
   onToggleSidebar 
 }: ConversationHeaderProps) {
   const isMobile = useMobile();
+  const { user } = useAuth();
   const [showBackgroundModal, setShowBackgroundModal] = useState(false);
   
   const handleAudioCall = () => {
@@ -128,6 +130,9 @@ export function ConversationHeader({
           open={showBackgroundModal}
           onClose={handleCloseBackgroundModal}
           conversationId={conversation.id}
+          currentBackground={conversation.participants.find(
+            (p: UserConversation) => p.userId === user?.id
+          )?.backgroundImage}
         />
       )}
     </header>
