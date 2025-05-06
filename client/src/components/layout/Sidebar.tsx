@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ConversationsList } from "@/components/conversations/ConversationsList";
 import { ContactButton } from "@/components/contacts/ContactButton";
 import { getUserInitials } from "@/lib/utils";
-import { Search, MessageSquare, Users, Radio, Phone, Settings, MoreVertical, UserPlus } from "lucide-react";
+import { Search, MessageSquare, Users, Radio, Phone, Settings, MoreVertical, UserPlus, UserCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type NavTab = "conversations" | "groups" | "channels";
+type NavTab = "conversations" | "groups" | "channels" | "contacts";
 
 export function Sidebar() {
   const { user, logout } = useAuth();
@@ -94,12 +94,12 @@ export function Sidebar() {
       </div>
       
       {/* Navigation Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex flex-wrap border-b border-gray-200 dark:border-gray-700">
         <button
           className={`flex-1 py-3 flex items-center justify-center ${
             activeTab === "conversations"
               ? "text-primary border-b-2 border-primary font-medium"
-              : "text-gray-500"
+              : "text-gray-500 dark:text-gray-400"
           }`}
           onClick={() => handleTabChange("conversations")}
         >
@@ -110,7 +110,7 @@ export function Sidebar() {
           className={`flex-1 py-3 flex items-center justify-center ${
             activeTab === "groups"
               ? "text-primary border-b-2 border-primary font-medium"
-              : "text-gray-500"
+              : "text-gray-500 dark:text-gray-400"
           }`}
           onClick={() => handleTabChange("groups")}
         >
@@ -121,13 +121,24 @@ export function Sidebar() {
           className={`flex-1 py-3 flex items-center justify-center ${
             activeTab === "channels"
               ? "text-primary border-b-2 border-primary font-medium"
-              : "text-gray-500"
+              : "text-gray-500 dark:text-gray-400"
           }`}
           onClick={() => handleTabChange("channels")}
         >
           <Radio className="h-4 w-4 mr-1" />
           Canais
         </button>
+        <Link 
+          href="/contacts"
+          className={`flex-1 py-3 flex items-center justify-center ${
+            location.startsWith('/contacts')
+              ? "text-primary border-b-2 border-primary font-medium"
+              : "text-gray-500 dark:text-gray-400"
+          }`}
+        >
+          <UserCheck className="h-4 w-4 mr-1" />
+          Contatos
+        </Link>
       </div>
       
       {/* List Content */}

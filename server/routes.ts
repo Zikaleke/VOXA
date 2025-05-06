@@ -321,6 +321,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get("/api/contacts/requests", authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const requests = await storage.getContactRequests(req.user!.id);
+      return res.status(200).json({ requests });
+    } catch (error) {
+      console.error("Get contact requests error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.post("/api/contacts/requests/:id/accept", authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const requestId = parseInt(req.params.id);
+      
+      await storage.acceptContactRequest(requestId, userId);
+      return res.status(200).json({ message: "Contact request accepted" });
+    } catch (error) {
+      console.error("Accept contact request error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.post("/api/contacts/requests/:id/reject", authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const requestId = parseInt(req.params.id);
+      
+      await storage.rejectContactRequest(requestId, userId);
+      return res.status(200).json({ message: "Contact request rejected" });
+    } catch (error) {
+      console.error("Reject contact request error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.post("/api/contacts/search", authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const schema = z.object({
+        query: z.string().min(1)
+      });
+      
+      const { query } = schema.parse(req.body);
+      const users = await storage.searchUsers(query, req.user!.id);
+      return res.status(200).json({ users });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      console.error("Search users error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.post("/api/contacts/request", authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const schema = z.object({
+        recipientId: z.number()
+      });
+      
+      const { recipientId } = schema.parse(req.body);
+      const senderId = req.user!.id;
+      
+      if (senderId === recipientId) {
+        return res.status(400).json({ message: "Cannot send contact request to yourself" });
+      }
+      
+      // Check if recipient exists
+      const recipient = await storage.getUserById(recipientId);
+      if (!recipient) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      await storage.createContactRequest(senderId, recipientId);
+      return res.status(201).json({ message: "Contact request sent" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      console.error("Send contact request error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
   app.post("/api/contacts", authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const schema = z.object({
