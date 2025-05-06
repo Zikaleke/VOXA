@@ -1,0 +1,370 @@
+// This is your Prisma schema file for TeleClone
+// More information: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Usuário do sistema
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String    @unique
+  username      String    @unique
+  password      String    // Senha hash
+  phoneNumber   String?
+  firstName     String
+  lastName      String?
+  bio           String?
+  profilePicUrl String?
+  isOnline      Boolean   @default(false)
+  lastSeen      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Status de verificação
+  isVerified    Boolean   @default(false)
+  verificationCode String?
+
+  // Configurações de perfil
+  settings      UserSettings?
+
+  // Relações
+  sentMessages        Message[]  @relation("SentMessages")
+  receivedMessages    Message[]  @relation("ReceivedMessages")
+  ownedConversations  Conversation[] @relation("ConversationOwner")
+  conversations       UserConversation[]
+  ownedGroups         Group[]    @relation("GroupOwner")
+  groupMemberships    GroupMember[]
+  ownedChannels       Channel[]  @relation("ChannelOwner")
+  channelMemberships  ChannelMember[]
+  initiatedCalls      Call[]     @relation("CallInitiator")
+  callParticipations  CallParticipant[]
+  contacts            Contact[]  @relation("UserContacts")
+  contactOf           Contact[]  @relation("ContactOf")
+  blockedUsers        BlockedUser[] @relation("BlockingUser")
+  blockedBy           BlockedUser[] @relation("BlockedUser")
+  notifications       Notification[]
+  mediaFiles          MediaFile[] @relation("UploadedMedia")
+
+  // Autenticação
+  sessions        Session[]
+  deviceTokens    DeviceToken[]
+}
+
+// Configurações do usuário
+model UserSettings {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId              String    @unique @db.ObjectId
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme               String    @default("light")
+  notificationEnabled Boolean   @default(true)
+  messagePreview      Boolean   @default(true)
+  lastSeenVisible     Boolean   @default(true)
+  profilePhotoVisible Boolean   @default(true)
+  readReceiptsEnabled Boolean   @default(true)
+  language            String    @default("pt-BR")
+  fontSize            Int       @default(14)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+// Sessão de usuário
+model Session {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token       String    @unique
+  device      String?
+  ipAddress   String?
+  userAgent   String?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Token de dispositivo para notificações push
+model DeviceToken {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token       String    @unique
+  device      String?
+  platform    String?   // "android", "ios", "web"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Contatos do usuário
+model Contact {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  user        User      @relation("UserContacts", fields: [userId], references: [id], onDelete: Cascade)
+  contactId   String    @db.ObjectId
+  contact     User      @relation("ContactOf", fields: [contactId], references: [id], onDelete: Cascade)
+  nickname    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, contactId])
+}
+
+// Usuários bloqueados
+model BlockedUser {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  blockerId   String    @db.ObjectId
+  blocker     User      @relation("BlockingUser", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId   String    @db.ObjectId
+  blocked     User      @relation("BlockedUser", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([blockerId, blockedId])
+}
+
+// Conversas (1:1)
+model Conversation {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  creatorId   String    @db.ObjectId
+  creator     User      @relation("ConversationOwner", fields: [creatorId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relacionamentos
+  participants     UserConversation[]
+  messages         Message[]
+  calls            Call[]
+}
+
+// Relação entre usuários e conversas
+model UserConversation {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversationId  String    @db.ObjectId
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  lastReadAt      DateTime?
+  isArchived      Boolean   @default(false)
+  isPinned        Boolean   @default(false)
+  isMuted         Boolean   @default(false)
+  muteExpiresAt   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([userId, conversationId])
+}
+
+// Grupos
+model Group {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  description     String?
+  photoUrl        String?
+  ownerId         String    @db.ObjectId
+  owner           User      @relation("GroupOwner", fields: [ownerId], references: [id])
+  isPublic        Boolean   @default(false)
+  inviteLink      String?   @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relacionamentos
+  members         GroupMember[]
+  messages        Message[]
+  calls           Call[]
+}
+
+// Membros do grupo
+model GroupMember {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  groupId         String    @db.ObjectId
+  group           Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            String    @default("member") // "owner", "admin", "member"
+  lastReadAt      DateTime?
+  isArchived      Boolean   @default(false)
+  isPinned        Boolean   @default(false)
+  isMuted         Boolean   @default(false)
+  muteExpiresAt   DateTime?
+  joinedAt        DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([groupId, userId])
+}
+
+// Canais
+model Channel {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  description     String?
+  photoUrl        String?
+  ownerId         String    @db.ObjectId
+  owner           User      @relation("ChannelOwner", fields: [ownerId], references: [id])
+  isPublic        Boolean   @default(false)
+  inviteLink      String?   @unique
+  subscriberCount Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relacionamentos
+  members         ChannelMember[]
+  messages        Message[]
+}
+
+// Membros do canal
+model ChannelMember {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  channelId       String    @db.ObjectId
+  channel         Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            String    @default("subscriber") // "owner", "admin", "subscriber"
+  lastReadAt      DateTime?
+  isArchived      Boolean   @default(false)
+  isPinned        Boolean   @default(false)
+  isMuted         Boolean   @default(false)
+  muteExpiresAt   DateTime?
+  joinedAt        DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([channelId, userId])
+}
+
+// Mensagens
+model Message {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  senderId        String    @db.ObjectId
+  sender          User      @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId     String?   @db.ObjectId
+  recipient       User?     @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  conversationId  String?   @db.ObjectId
+  conversation    Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  groupId         String?   @db.ObjectId
+  group           Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  channelId       String?   @db.ObjectId
+  channel         Channel?  @relation(fields: [channelId], references: [id], onDelete: SetNull)
+  
+  content         String?
+  type            String    @default("text") // "text", "image", "video", "audio", "file", "location", "contact", "sticker"
+  
+  // Mensagem original em caso de resposta
+  replyToId       String?   @db.ObjectId
+  replyTo         Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies         Message[] @relation("MessageReplies")
+  
+  // Mensagem original em caso de encaminhamento
+  forwardFromId   String?   @db.ObjectId
+  forwardFrom     Message?  @relation("MessageForwards", fields: [forwardFromId], references: [id], onDelete: SetNull)
+  forwards        Message[] @relation("MessageForwards")
+  
+  // Autodestruição
+  selfDestructTime Int?     // Tempo em segundos
+  expiresAt       DateTime?
+  
+  // Status da mensagem
+  isEdited        Boolean   @default(false)
+  editedAt        DateTime?
+  isDeleted       Boolean   @default(false)
+  deletedAt       DateTime?
+  
+  // Contadores
+  viewCount       Int       @default(0)
+  
+  // Timestamps
+  sentAt          DateTime  @default(now())
+  deliveredAt     DateTime?
+  readAt          DateTime?
+  
+  // Relacionamentos
+  media           MediaFile[]
+  reactions       MessageReaction[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Mídias
+model MediaFile {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  messageId       String?   @db.ObjectId
+  message         Message?  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  uploaderId      String    @db.ObjectId
+  uploader        User      @relation("UploadedMedia", fields: [uploaderId], references: [id])
+  fileUrl         String
+  thumbnailUrl    String?
+  fileName        String?
+  fileSize        Int       // Em bytes
+  fileType        String    // MIME type
+  width           Int?      // Para imagens e vídeos
+  height          Int?      // Para imagens e vídeos
+  duration        Int?      // Para áudios e vídeos (em segundos)
+  isPublic        Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+}
+
+// Reações a mensagens
+model MessageReaction {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  messageId       String    @db.ObjectId
+  message         Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji           String
+  createdAt       DateTime  @default(now())
+
+  @@unique([messageId, userId, emoji])
+}
+
+// Chamadas
+model Call {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  initiatorId     String    @db.ObjectId
+  initiator       User      @relation("CallInitiator", fields: [initiatorId], references: [id])
+  conversationId  String?   @db.ObjectId
+  conversation    Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  groupId         String?   @db.ObjectId
+  group           Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  type            String    @default("audio") // "audio", "video"
+  status          String    @default("initiated") // "initiated", "ongoing", "ended", "missed", "rejected"
+  startedAt       DateTime?
+  endedAt         DateTime?
+  duration        Int?      // Em segundos
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relacionamentos
+  participants    CallParticipant[]
+}
+
+// Participantes da chamada
+model CallParticipant {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  callId          String    @db.ObjectId
+  call            Call      @relation(fields: [callId], references: [id], onDelete: Cascade)
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          String    // "invited", "joined", "left", "rejected"
+  joinedAt        DateTime?
+  leftAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([callId, userId])
+}
+
+// Notificações
+model Notification {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            String    // "message", "call", "groupInvite", "mention", "reaction", etc.
+  title           String
+  body            String
+  data            Json?     // Dados específicos para cada tipo de notificação
+  isRead          Boolean   @default(false)
+  readAt          DateTime?
+  createdAt       DateTime  @default(now())
+}
