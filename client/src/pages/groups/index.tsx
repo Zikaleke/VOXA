@@ -1,14 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNavigation } from "@/components/layout/MobileNavigation";
 import { Button } from "@/components/ui/button";
 import { Plus, Users } from "lucide-react";
+import { CreateGroupModal } from "@/components/groups/CreateGroupModal";
 
 export default function GroupsPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -31,7 +33,7 @@ export default function GroupsPage() {
       <main className="flex-1 flex flex-col h-full">
         <header className="bg-white border-b border-gray-200 p-4 flex justify-between items-center">
           <h1 className="text-xl font-semibold">Grupos</h1>
-          <Button>
+          <Button onClick={() => setIsModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Novo Grupo
           </Button>
@@ -43,7 +45,7 @@ export default function GroupsPage() {
           <p className="text-gray-500 mb-6 text-center max-w-md">
             Crie um grupo para conversar com várias pessoas ao mesmo tempo
           </p>
-          <Button>
+          <Button onClick={() => setIsModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Criar Grupo
           </Button>
@@ -51,6 +53,12 @@ export default function GroupsPage() {
       </main>
       
       <MobileNavigation />
+      
+      {/* Modal de criação de grupo */}
+      <CreateGroupModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 }
