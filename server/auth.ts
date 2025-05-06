@@ -137,8 +137,16 @@ export const authRoutes = {
       }
       
       // Check if user is verified
-      if (!user.isVerified) {
+      const isDevelopment = process.env.NODE_ENV !== 'production';
+      
+      if (!user.isVerified && !isDevelopment) {
         return res.status(400).json({ message: 'Email not verified', requiresVerification: true });
+      }
+      
+      // If in development mode and user is not verified, auto-verify them
+      if (!user.isVerified && isDevelopment) {
+        console.log('Development mode: Auto-verifying user', user.email);
+        await storage.verifyUserEmail(user.email, user.verificationCode || '');
       }
       
       // Validate password
@@ -189,7 +197,7 @@ export const authRoutes = {
     try {
       const { email, code } = verifyEmailSchema.parse(req.body);
       
-      const verified = await storage.verifyUserEmail(email, code);
+      const verified = await storage.verifyUserEmail(email, code || '');
       if (!verified) {
         return res.status(400).json({ message: 'Invalid verification code' });
       }
