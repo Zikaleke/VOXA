@@ -11,6 +11,7 @@ run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [workflows]
+runButton = "Dev Server"
 
 [[workflows.workflow]]
 name = "Project"
@@ -29,6 +30,15 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Dev Server"
+author = 42388146
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
 
 [[ports]]
 localPort = 5000
