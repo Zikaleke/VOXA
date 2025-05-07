@@ -13,13 +13,13 @@ app.use(cookieParser());
 
 const startServer = async () => {
   try {
-    const server = await registerRoutes(app);
-
-    // Configurar CORS adequadamente
+    // Configurar CORS primeiro
     app.use(cors({
       origin: true,
       credentials: true
     }));
+
+    const server = await registerRoutes(app);
 
     if (process.env.NODE_ENV === "development") {
       await setupVite(app, server);
