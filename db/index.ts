@@ -9,7 +9,9 @@ if (!process.env.DATABASE_URL) {
   console.warn("DATABASE_URL não configurada, usando URL local");
 }
 
-const sql = neon(process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/voxa');
+// Usar URL direta sem pooler
+const dbUrl = process.env.DATABASE_URL?.replace('-pooler.', '.');
+const sql = neon(dbUrl || 'postgresql://postgres:postgres@localhost:5432/voxa');
 export const db = drizzle(sql, { schema });
 
 console.log('Configuração do banco de dados inicializada');
