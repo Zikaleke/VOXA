@@ -85,17 +85,25 @@ export const authRoutes = {
       console.log('Received registration request:', req.body);
       const userData = userRegisterSchema.parse(req.body);
       
-      // Check if user already exists
-      const existingEmail = await storage.getUserByEmail(userData.email);
-      if (existingEmail) {
-        console.log('Email already exists:', userData.email);
-        return res.status(400).json({ message: 'Email já está em uso' });
-      }
-      
-      const existingUsername = await storage.getUserByUsername(userData.username);
-      if (existingUsername) {
-        console.log('Username already exists:', userData.username);
-        return res.status(400).json({ message: 'Nome de usuário já está em uso' });
+      try {
+        // Check if user already exists
+        const existingEmail = await storage.getUserByEmail(userData.email);
+        if (existingEmail) {
+          console.log('Email already exists:', userData.email);
+          return res.status(400).json({ message: 'Email já está em uso' });
+        }
+        
+        const existingUsername = await storage.getUserByUsername(userData.username);
+        if (existingUsername) {
+          console.log('Username already exists:', userData.username);
+          return res.status(400).json({ message: 'Nome de usuário já está em uso' });
+        }
+      } catch (dbError) {
+        console.error('Database connection error:', dbError);
+        return res.status(500).json({ 
+          message: 'Erro de conexão com o banco de dados', 
+          details: 'Verifique se a variável DATABASE_URL está configurada corretamente' 
+        });
       }
       
       // Create user
@@ -125,7 +133,16 @@ export const authRoutes = {
         return res.status(400).json({ message: 'Validation error', errors: error.errors });
       }
       console.error('Register error:', error);
-      res.status(500).json({ message: 'Server error' });
+      
+      // Melhor mensagem de erro
+      if (error instanceof Error && error.message.includes('getaddrinfo ENOTFOUND')) {
+        return res.status(500).json({ 
+          message: 'Erro de conexão com o banco de dados', 
+          details: 'Não foi possível conectar ao servidor de banco de dados. Verifique se a URL do banco de dados está correta.'
+        });
+      }
+      
+      res.status(500).json({ message: 'Erro no servidor', details: error instanceof Error ? error.message : 'Erro desconhecido' });
     }
   },
   
