@@ -6,19 +6,26 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/voxa';
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL não configurada. Configure a variável de ambiente DATABASE_URL.");
+}
 
 try {
-  export const pool = new Pool({ connectionString: DATABASE_URL });
-  export const db = drizzle({ client: pool, schema });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const db = drizzle({ client: pool, schema });
   
-  // Teste a conexão
-  pool.connect().then(() => {
-    console.log('Conectado ao banco de dados com sucesso');
-  }).catch(err => {
-    console.error('Erro ao conectar ao banco de dados:', err);
-  });
+  // Testar conexão
+  pool.connect()
+    .then(() => {
+      console.log('Conectado ao banco de dados com sucesso');
+    })
+    .catch(err => {
+      console.error('Erro ao conectar ao banco de dados:', err);
+      process.exit(1);
+    });
+
+  export { pool, db };
 } catch (error) {
   console.error('Erro ao configurar banco de dados:', error);
-  throw error;
+  process.exit(1);
 }

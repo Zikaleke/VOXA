@@ -7,12 +7,17 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
+// Configurar CORS adequadamente
+app.use(cors({
+  origin: ['http://localhost:5000', 'https://localhost:5000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Middlewares essenciais
 app.use(express.json());
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
