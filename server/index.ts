@@ -15,14 +15,21 @@ const startServer = async () => {
   try {
     const server = await registerRoutes(app);
 
+    // Configurar CORS adequadamente
+    app.use(cors({
+      origin: true,
+      credentials: true
+    }));
+
     if (process.env.NODE_ENV === "development") {
       await setupVite(app, server);
     } else {
       serveStatic(app);
     }
 
-    server.listen(5000, "0.0.0.0", () => {
-      console.log("Servidor rodando na porta 5000");
+    const port = process.env.PORT || 5000;
+    server.listen(port, "0.0.0.0", () => {
+      console.log(`Servidor rodando na porta ${port}`);
     });
   } catch (error) {
     console.error("Erro ao iniciar servidor:", error);

@@ -11,7 +11,7 @@ run = ["sh", "-c", "NODE_ENV=production node dist/index.js"]
 build = ["sh", "-c", "npm run build"]
 
 [workflows]
-runButton = "Start Dev"
+runButton = "Dev"
 
 [[workflows.workflow]]
 name = "Project"
@@ -50,6 +50,19 @@ args = "npm run dev"
 
 [[workflows.workflow]]
 name = "Start Dev"
+author = 42388146
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow]]
+name = "Dev"
 author = 42388146
 mode = "sequential"
 
