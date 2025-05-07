@@ -22,4 +22,4 @@ try {
   console.error('Erro ao inicializar conexão com banco de dados:', error);
   // Exportar um objeto de banco de dados mock para evitar erros de importação
   export const db = {} as any;
-}');
+}
