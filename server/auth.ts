@@ -82,17 +82,20 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 export const authRoutes = {
   async register(req: Request, res: Response) {
     try {
+      console.log('Received registration request:', req.body);
       const userData = userRegisterSchema.parse(req.body);
       
       // Check if user already exists
       const existingEmail = await storage.getUserByEmail(userData.email);
       if (existingEmail) {
-        return res.status(400).json({ message: 'Email already in use' });
+        console.log('Email already exists:', userData.email);
+        return res.status(400).json({ message: 'Email já está em uso' });
       }
       
       const existingUsername = await storage.getUserByUsername(userData.username);
       if (existingUsername) {
-        return res.status(400).json({ message: 'Username already taken' });
+        console.log('Username already exists:', userData.username);
+        return res.status(400).json({ message: 'Nome de usuário já está em uso' });
       }
       
       // Create user
@@ -128,12 +131,14 @@ export const authRoutes = {
   
   async login(req: Request, res: Response) {
     try {
+      console.log('Received login request:', req.body);
       const { email, password } = userLoginSchema.parse(req.body);
       
       // Get user
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        return res.status(400).json({ message: 'Invalid credentials' });
+        console.log('User not found:', email);
+        return res.status(400).json({ message: 'Email ou senha inválidos' });
       }
       
       // Check if user is verified
