@@ -18,3 +18,7 @@
     "hooks": "@/hooks"
   }
 }
+cd client
+npm install
+bash
+ls
