@@ -13,6 +13,12 @@ app.use(cookieParser());
 
 const startServer = async () => {
   try {
+    // Configurar CORS primeiro
+    app.use(cors({
+      origin: true,
+      credentials: true
+    }));
+
     const server = await registerRoutes(app);
 
     if (process.env.NODE_ENV === "development") {
@@ -21,8 +27,9 @@ const startServer = async () => {
       serveStatic(app);
     }
 
-    server.listen(5000, "0.0.0.0", () => {
-      console.log("Servidor rodando na porta 5000");
+    const port = process.env.PORT || 5000;
+    server.listen(port, "0.0.0.0", () => {
+      console.log(`Servidor rodando na porta ${port}`);
     });
   } catch (error) {
     console.error("Erro ao iniciar servidor:", error);

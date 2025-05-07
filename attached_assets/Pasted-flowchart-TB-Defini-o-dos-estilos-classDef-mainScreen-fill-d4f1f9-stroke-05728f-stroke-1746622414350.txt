@@ -1,0 +1,235 @@
+flowchart TB
+    %% Definição dos estilos
+    classDef mainScreen fill:#d4f1f9,stroke:#05728f,stroke-width:2px
+    classDef authFlow fill:#ffe6cc,stroke:#d79b00,stroke-width:2px
+    classDef conversationFlow fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+    classDef mediaFlow fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+    classDef callFlow fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+    classDef groupFlow fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+    classDef settingsFlow fill:#f8cecc,stroke:#b85450,stroke-width:2px
+    
+    %% Fluxo de Autenticação
+    Start([Iniciar Aplicativo]) --> SplashScreen[Tela de Splash]
+    SplashScreen --> CheckAuth{Já está autenticado?}
+    
+    CheckAuth -->|Não| Login[Tela de Login]:::authFlow
+    Login -->|Email/senha| ValidateLogin{Validar Login}
+    Login -->|Criar conta| Register[Tela de Registro]:::authFlow
+    
+    ValidateLogin -->|Sucesso| MainScreen
+    ValidateLogin -->|Falha| LoginError[Exibir Erro]:::authFlow
+    LoginError --> Login
+    
+    Register -->|Preencher dados| ValidateRegister{Validar Registro}
+    ValidateRegister -->|Sucesso| VerifyEmail[Verificar Email]:::authFlow
+    ValidateRegister -->|Falha| RegisterError[Exibir Erro]:::authFlow
+    RegisterError --> Register
+    
+    VerifyEmail -->|Código Válido| SetupProfile[Configurar Perfil]:::authFlow
+    VerifyEmail -->|Código Inválido| VerifyEmailError[Exibir Erro]:::authFlow
+    VerifyEmailError --> VerifyEmail
+    
+    SetupProfile -->|Concluído| MainScreen[Tela Principal]:::mainScreen
+    
+    CheckAuth -->|Sim| MainScreen
+    
+    %% Tela Principal e Navegação
+    MainScreen --> NavigationMenu{Menu de Navegação}
+    
+    NavigationMenu -->|Conversas| ConversationsList[Lista de Conversas]:::conversationFlow
+    NavigationMenu -->|Contatos| ContactsList[Lista de Contatos]:::conversationFlow
+    NavigationMenu -->|Grupos| GroupsList[Lista de Grupos]:::groupFlow
+    NavigationMenu -->|Canais| ChannelsList[Lista de Canais]:::groupFlow
+    NavigationMenu -->|Chamadas| CallHistory[Histórico de Chamadas]:::callFlow
+    NavigationMenu -->|Configurações| Settings[Configurações]:::settingsFlow
+    
+    %% Fluxo de Conversas
+    ConversationsList -->|Nova conversa| SelectContact[Selecionar Contato]:::conversationFlow
+    ConversationsList -->|Abrir conversa| ConversationView[Visualizar Conversa]:::conversationFlow
+    
+    SelectContact --> ConversationView
+    
+    ConversationView -->|Enviar mensagem| MessageOptions{Tipo de Mensagem}:::conversationFlow
+    ConversationView -->|Iniciar chamada| CallOptions{Tipo de Chamada}:::callFlow
+    ConversationView -->|Ver perfil| ContactProfile[Perfil do Contato]:::conversationFlow
+    ConversationView -->|Opções conversa| ConversationSettings[Opções da Conversa]:::conversationFlow
+    
+    MessageOptions -->|Texto| SendTextMessage[Enviar Texto]:::conversationFlow
+    MessageOptions -->|Mídia| MediaOptions{Tipo de Mídia}:::mediaFlow
+    MessageOptions -->|Localização| SendLocation[Enviar Localização]:::conversationFlow
+    MessageOptions -->|Contato| SendContact[Enviar Contato]:::conversationFlow
+    
+    MediaOptions -->|Foto| TakePhoto[Capturar Foto]:::mediaFlow
+    MediaOptions -->|Vídeo| RecordVideo[Gravar Vídeo]:::mediaFlow
+    MediaOptions -->|Áudio| RecordAudio[Gravar Áudio]:::mediaFlow
+    MediaOptions -->|Arquivo| SelectFile[Selecionar Arquivo]:::mediaFlow
+    
+    TakePhoto --> PreviewMedia[Pré-visualizar Mídia]:::mediaFlow
+    RecordVideo --> PreviewMedia
+    RecordAudio --> PreviewMedia
+    SelectFile --> PreviewMedia
+    
+    PreviewMedia -->|Confirmar| SendMedia[Enviar Mídia]:::mediaFlow
+    PreviewMedia -->|Cancelar| MediaOptions
+    
+    SendTextMessage --> MessageSent[Mensagem Enviada]:::conversationFlow
+    SendMedia --> MessageSent
+    SendLocation --> MessageSent
+    SendContact --> MessageSent
+    
+    MessageSent --> MessageStatus{Status da Mensagem}:::conversationFlow
+    MessageStatus -->|Enviada| SentIndicator[Indicador: Enviada]:::conversationFlow
+    MessageStatus -->|Entregue| DeliveredIndicator[Indicador: Entregue]:::conversationFlow
+    MessageStatus -->|Lida| ReadIndicator[Indicador: Lida]:::conversationFlow
+    
+    ConversationView -->|Mensagem recebida| ReceiveMessage[Receber Mensagem]:::conversationFlow
+    ReceiveMessage --> ShowNotification[Exibir Notificação]:::conversationFlow
+    ShowNotification --> UpdateConversationList[Atualizar Lista de Conversas]:::conversationFlow
+    
+    ConversationView -->|Pressionar mensagem| MessageActions{Ações na Mensagem}:::conversationFlow
+    MessageActions -->|Responder| ReplyToMessage[Responder Mensagem]:::conversationFlow
+    MessageActions -->|Encaminhar| ForwardMessage[Encaminhar Mensagem]:::conversationFlow
+    MessageActions -->|Editar| EditMessage[Editar Mensagem]:::conversationFlow
+    MessageActions -->|Excluir| DeleteMessage[Excluir Mensagem]:::conversationFlow
+    MessageActions -->|Reagir| AddReaction[Adicionar Reação]:::conversationFlow
+    
+    ReplyToMessage --> MessageOptions
+    EditMessage --> MessageOptions
+    ForwardMessage --> SelectConversation[Selecionar Destino]:::conversationFlow
+    SelectConversation --> MessageSent
+    
+    %% Fluxo de Chamadas
+    CallOptions -->|Voz| InitiateVoiceCall[Iniciar Chamada de Voz]:::callFlow
+    CallOptions -->|Grupo| InitiateGroupCall[Iniciar Chamada em Grupo]:::callFlow
+    
+    InitiateVoiceCall --> CallingScreen[Tela de Chamada]:::callFlow
+    InitiateGroupCall --> SelectGroupMembers[Selecionar Membros]:::callFlow
+    SelectGroupMembers --> CallingScreen
+    
+    CallingScreen --> CallStatus{Status da Chamada}:::callFlow
+    CallStatus -->|Aguardando| RingingState[Chamando...]:::callFlow
+    CallStatus -->|Conectada| ConnectedState[Chamada Conectada]:::callFlow
+    CallStatus -->|Finalizada| EndedState[Chamada Finalizada]:::callFlow
+    CallStatus -->|Recusada| RejectedState[Chamada Recusada]:::callFlow
+    
+    ConnectedState -->|Mutar| MuteCall[Mutar Áudio]:::callFlow
+    ConnectedState -->|Encerrar| EndCall[Encerrar Chamada]:::callFlow
+    ConnectedState -->|Altofalante| ToggleSpeaker[Ativar Altofalante]:::callFlow
+    ConnectedState -->|Minimizar| MinimizeCall[Minimizar Chamada]:::callFlow
+    
+    EndCall --> CallSummary[Resumo da Chamada]:::callFlow
+    CallSummary --> ConversationView
+    
+    MinimizeCall --> FloatingCallWidget[Widget Flutuante de Chamada]:::callFlow
+    FloatingCallWidget -->|Retornar| ConnectedState
+    FloatingCallWidget -->|Encerrar| EndCall
+    
+    %% Fluxo de Grupos
+    GroupsList -->|Novo grupo| CreateGroup[Criar Grupo]:::groupFlow
+    GroupsList -->|Abrir grupo| GroupView[Visualizar Grupo]:::groupFlow
+    
+    CreateGroup -->|Configurar grupo| SetGroupInfo[Definir Info do Grupo]:::groupFlow
+    SetGroupInfo -->|Adicionar membros| AddGroupMembers[Adicionar Membros]:::groupFlow
+    AddGroupMembers --> GroupCreated[Grupo Criado]:::groupFlow
+    GroupCreated --> GroupView
+    
+    GroupView -->|Enviar mensagem| MessageOptions
+    GroupView -->|Ver info| GroupInfo[Informações do Grupo]:::groupFlow
+    GroupView -->|Iniciar chamada| InitiateGroupCall
+    
+    GroupInfo -->|Editar grupo| EditGroupInfo[Editar Informações]:::groupFlow
+    GroupInfo -->|Gerenciar membros| ManageMembers[Gerenciar Membros]:::groupFlow
+    GroupInfo -->|Notificações| GroupNotifications[Configurar Notificações]:::groupFlow
+    GroupInfo -->|Mídia compartilhada| SharedMedia[Mídia Compartilhada]:::groupFlow
+    
+    ManageMembers -->|Adicionar| AddNewMembers[Adicionar Novos Membros]:::groupFlow
+    ManageMembers -->|Remover| RemoveMembers[Remover Membros]:::groupFlow
+    ManageMembers -->|Promover| PromoteMembers[Promover a Admin]:::groupFlow
+    
+    %% Fluxo de Canais
+    ChannelsList -->|Novo canal| CreateChannel[Criar Canal]:::groupFlow
+    ChannelsList -->|Abrir canal| ChannelView[Visualizar Canal]:::groupFlow
+    ChannelsList -->|Procurar canais| SearchChannels[Buscar Canais]:::groupFlow
+    
+    CreateChannel -->|Configurar canal| SetChannelInfo[Definir Info do Canal]:::groupFlow
+    SetChannelInfo -->|Adicionar admins| AddChannelAdmins[Adicionar Administradores]:::groupFlow
+    AddChannelAdmins --> ChannelCreated[Canal Criado]:::groupFlow
+    ChannelCreated --> ChannelView
+    
+    ChannelView -->|Publicar| PostToChannel[Publicar no Canal]:::groupFlow
+    ChannelView -->|Ver info| ChannelInfo[Informações do Canal]:::groupFlow
+    
+    ChannelInfo -->|Editar canal| EditChannelInfo[Editar Informações]:::groupFlow
+    ChannelInfo -->|Link convite| ManageInviteLink[Gerenciar Link de Convite]:::groupFlow
+    ChannelInfo -->|Estatísticas| ChannelStats[Ver Estatísticas]:::groupFlow
+    
+    SearchChannels -->|Encontrado| JoinChannel[Ingressar no Canal]:::groupFlow
+    JoinChannel --> ChannelView
+    
+    %% Fluxo de Contatos
+    ContactsList -->|Adicionar contato| AddContact[Adicionar Contato]:::conversationFlow
+    ContactsList -->|Ver contato| ContactProfile
+    
+    AddContact -->|Por nome usuário| SearchByUsername[Buscar por Username]:::conversationFlow
+    AddContact -->|Por número| SearchByPhone[Buscar por Telefone]:::conversationFlow
+    AddContact -->|Via QR Code| ScanQRCode[Escanear QR Code]:::conversationFlow
+    
+    SearchByUsername --> ContactFound{Contato Encontrado?}:::conversationFlow
+    SearchByPhone --> ContactFound
+    ScanQRCode --> ContactFound
+    
+    ContactFound -->|Sim| SendContactRequest[Enviar Solicitação]:::conversationFlow
+    ContactFound -->|Não| ContactNotFound[Contato Não Encontrado]:::conversationFlow
+    ContactNotFound --> AddContact
+    
+    SendContactRequest --> RequestSent[Solicitação Enviada]:::conversationFlow
+    RequestSent --> ContactProfile
+    
+    ContactProfile -->|Iniciar conversa| ConversationView
+    ContactProfile -->|Iniciar chamada| CallOptions
+    ContactProfile -->|Bloquear| BlockContact[Bloquear Contato]:::conversationFlow
+    ContactProfile -->|Compartilhar| ShareContact[Compartilhar Contato]:::conversationFlow
+    
+    %% Fluxo de Configurações
+    Settings -->|Perfil| ProfileSettings[Configurações de Perfil]:::settingsFlow
+    Settings -->|Privacidade| PrivacySettings[Configurações de Privacidade]:::settingsFlow
+    Settings -->|Notificações| NotificationSettings[Configurações de Notificações]:::settingsFlow
+    Settings -->|Aparência| AppearanceSettings[Configurações de Aparência]:::settingsFlow
+    Settings -->|Armazenamento| StorageSettings[Gerenciamento de Armazenamento]:::settingsFlow
+    Settings -->|Idioma| LanguageSettings[Configurações de Idioma]:::settingsFlow
+    Settings -->|Ajuda| Help[Ajuda e Suporte]:::settingsFlow
+    Settings -->|Sair| Logout[Encerrar Sessão]:::authFlow
+    
+    ProfileSettings -->|Editar nome| ChangeName[Alterar Nome]:::settingsFlow
+    ProfileSettings -->|Editar foto| ChangePhoto[Alterar Foto]:::settingsFlow
+    ProfileSettings -->|Editar bio| ChangeBio[Alterar Biografia]:::settingsFlow
+    
+    PrivacySettings -->|Último acesso| LastSeenPrivacy[Privacidade de Último Acesso]:::settingsFlow
+    PrivacySettings -->|Foto perfil| ProfilePhotoPrivacy[Privacidade de Foto]:::settingsFlow
+    PrivacySettings -->|Bloqueados| BlockedUsers[Usuários Bloqueados]:::settingsFlow
+    PrivacySettings -->|Mensagens| MessagePrivacy[Privacidade de Mensagens]:::settingsFlow
+    
+    NotificationSettings -->|Sons| SoundSettings[Configurações de Som]:::settingsFlow
+    NotificationSettings -->|Exceções| NotificationExceptions[Exceções de Notificação]:::settingsFlow
+    
+    AppearanceSettings -->|Tema| ThemeSettings[Configurações de Tema]:::settingsFlow
+    AppearanceSettings -->|Tamanho texto| TextSizeSettings[Tamanho de Texto]:::settingsFlow
+    
+    StorageSettings -->|Limpar cache| ClearCache[Limpar Cache]:::settingsFlow
+    StorageSettings -->|Uso de dados| DataUsage[Uso de Dados]:::settingsFlow
+    StorageSettings -->|Download automático| AutoDownloadSettings[Download Automático]:::settingsFlow
+    
+    Logout --> ConfirmLogout{Confirma Saída?}:::authFlow
+    ConfirmLogout -->|Sim| Login
+    ConfirmLogout -->|Não| Settings
+    
+    %% Busca e Globalização
+    MainScreen -->|Pesquisar| GlobalSearch[Pesquisa Global]:::mainScreen
+    GlobalSearch --> SearchResults{Resultados}:::mainScreen
+    
+    SearchResults -->|Conversa| ConversationView
+    SearchResults -->|Contato| ContactProfile
+    SearchResults -->|Grupo| GroupView
+    SearchResults -->|Canal| ChannelView
+    SearchResults -->|Mensagem| MessageContext[Contexto da Mensagem]:::conversationFlow
+    MessageContext --> ConversationView
