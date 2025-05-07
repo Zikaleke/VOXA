@@ -1,3 +1,4 @@
+
 import { neon, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import ws from 'ws';
@@ -6,15 +7,11 @@ import * as schema from '../shared/schema';
 neonConfig.webSocketConstructor = ws;
 
 // Configuração do banco de dados
-if (!process.env.DATABASE_URL) {
-  console.warn("DATABASE_URL não configurada. Por favor, configure esta variável de ambiente em Secrets.");
-  console.warn("Utilizando URL local para desenvolvimento. A aplicação pode não funcionar corretamente.");
-}
+const DATABASE_URL = "postgresql://postgres:Willian2012.@db.idzcwcmvqxvlqhbzuouk.supabase.co:5432/postgres";
 
 try {
-  // Usar URL direta sem pooler
-  const dbUrl = process.env.DATABASE_URL?.replace('-pooler.', '.');
-  const sql = neon(dbUrl || 'postgresql://postgres:postgres@localhost:5432/voxa');
+  // Usar a URL direta do banco de dados
+  const sql = neon(DATABASE_URL);
   export const db = drizzle(sql, { schema });
   
   console.log('Configuração do banco de dados inicializada com sucesso');
