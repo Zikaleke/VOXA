@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { User } from '@shared/schema';
+import { User } from '../shared/schema';
 
 // Extend Request type to include user property
 declare global {
